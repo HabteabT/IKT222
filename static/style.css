@@ -1,0 +1,72 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #f4f4f4;  /* Main background for the body */
+}
+
+h2 {
+    color: #35424a;
+}
+
+form {
+    margin: 20px 0;
+}
+
+form div {
+    margin-bottom: 15px;  /* Adds space between form elements */
+}
+
+header {
+    text-align: center;  /* Center the text in the header */
+    margin-top: 20px;    /* Add some spacing from the top */
+    background-color: #001f3f;  /* Set header background to dark blue */
+    padding: 20px;  /* Add padding for spacing */
+    color: white;  /* Change text color to white for better contrast */
+    border-radius: 10px;  /* Optional: Round the corners for a softer look */
+}
+
+nav {
+    text-align: center;  /* Center the navigation links */
+    margin-top: 10px;    /* Add some spacing below the header */
+    background-color: #001f3f;  /* Set navigation background to dark blue */
+    padding: 10px;  /* Add padding to the navigation links */
+    border-radius: 5px;  /* Optional: Add some border-radius for rounded corners */
+}
+
+nav a {
+    color: white;  /* Change the navigation link color to white */
+    text-decoration: none;
+    margin: 0 10px;
+}
+
+nav a:hover {
+    text-decoration: underline;  /* Underline links on hover */
+}
+
+input[type="text"] {
+    width: 20%;  /* Set title box width */
+    padding: 10px;
+    margin-top: 5px;
+    border: 1px solid #ddd;
+}
+
+textarea {
+    width: 50%;  /* Set content box width */
+    height: 150px;  /* Set a height for the content box */
+    padding: 10px;
+    margin-top: 5px;
+    border: 1px solid #ddd;
+}
+
+button {
+    padding: 10px 20px;  /* Style the submit button */
+    background-color: #35424a;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #555;
+}

@@ -1,0 +1,10 @@
+services:
+  web:
+    build: .
+    ports:
+      - "5000:5000"  # Expose Flask on port 5000
+    volumes:
+      - .:/app  # Syncs the current directory with the container for code changes
+      - ./instance:/app/instance  # Persist SQLite database data
+    environment:
+      - FLASK_ENV=development
