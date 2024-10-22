@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for
 from models import db, Post
+import bleach
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
@@ -24,6 +25,15 @@ def detect_xss(content):
         return True
     return False
 
+def cleanInput(content):
+
+    tag = ['p']
+    attributes = {
+        'a': ['title'],
+    }
+    newContent = bleach.clean(content, tags=tag, attributes=attributes, strip=True)
+    return newContent
+
 
 @app.route('/')
 def index():
@@ -32,17 +42,16 @@ def index():
 @app.route('/create', methods=['GET', 'POST'])
 def create_post():
     if request.method == 'POST':
-        content = request.form['content']
+        title = request.form['title']
+        content = cleanInput(request.form['content'])  
 
-        if detect_xss(content):
-            print("XSS vulnerability being executed.")  # Just for logging purposes
-
-        new_post = Post(title=request.form['title'], content=content)
+        new_post = Post(title=title, content=content)
         db.session.add(new_post)
         db.session.commit()
         return redirect(url_for('index'))
 
     return render_template('create_post.html')
+
 
 @app.route('/post/<int:post_id>')
 def post(post_id):
