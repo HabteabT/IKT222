@@ -8,22 +8,7 @@
     {% for post in posts %}
         <li>
             <h3><a href="{{ url_for('post', post_id=post.id) }}">{{ post.title }}</a></h3>
-
-            {% if post.content.strip() == "<script>alert('XSS Vulnerability!');</script>" %}
-                <!-- XSS Attack detected. Display the alert -->
-                <script>
-                    alert('XSS Attack');
-                    // After alert is closed, change the page content
-                    document.addEventListener('DOMContentLoaded', function() {
-                        setTimeout(function() {
-                            document.body.innerHTML = '<h1 style="color:red; text-align:center;">This page is hacked</h1>';
-                        }, 1000); // Delay by 1 second after the alert
-                    });
-                </script>
-            {% else %}
-                <p>{{ post.content | safe }}</p>
-            {% endif %}
-
+                <p>{{ post.content}}</p> <!--safe is removed-->
             <form action="{{ url_for('delete_post', post_id=post.id) }}" method="POST" style="display:inline;">
                 <button type="submit">Delete</button>
             </form>

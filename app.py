@@ -19,7 +19,6 @@ def add_security_headers(response):
     return response
 
 def detect_xss(content):
-    # Detect the specific XSS payload "<script>alert('XSS Vulnerability!');</script>"
     if content.strip() == "<script>alert('XSS Vulnerability!');</script>":
         print("XSS Vulnerability detected!")
         return True
@@ -34,16 +33,27 @@ def cleanInput(content):
     newContent = bleach.clean(content, tags=tag, attributes=attributes, strip=True)
     return newContent
 
+def clean_output(content):
+    tag = ['p']
+    attributes = {}
+    
+    sanitized_content = bleach.clean(content, tags=tag, attributes=attributes, strip=True)
+    return sanitized_content
+
 
 @app.route('/')
 def index():
-    return render_template('index.html', posts=Post.query.all())
+    posts = Post.query.all()
+    for post in posts:
+        post.content = clean_output(post.content)
+        
+    return render_template('index.html', posts=posts)
 
 @app.route('/create', methods=['GET', 'POST'])
 def create_post():
     if request.method == 'POST':
-        title = request.form['title']
-        content = cleanInput(request.form['content'])  
+        title = (request.form['title'])
+        content = (request.form['content'])  
 
         new_post = Post(title=title, content=content)
         db.session.add(new_post)
@@ -56,7 +66,8 @@ def create_post():
 @app.route('/post/<int:post_id>')
 def post(post_id):
     post = Post.query.get_or_404(post_id)
-    return render_template('post.html', post=post)
+    sanitized_content = clean_output(post.content)
+    return render_template('post.html', post=post, sanitized_content=sanitized_content)
 
 @app.route('/edit/<int:post_id>', methods=['GET', 'POST'])
 def edit_post(post_id):
