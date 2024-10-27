@@ -4,7 +4,7 @@
 
 {% block content %}
     <h2>{{ post.title }}</h2>
-    <pre>{{ sanitized_content }}</pre> <!--safe is removed-->
+    <pre>{{ sanitized_content}}</pre> <!--safe is removed-->
     <form action="{{ url_for('delete_post', post_id=post.id) }}" method="POST">
         <button type="submit">Delete</button>
     </form>

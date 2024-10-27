@@ -52,8 +52,8 @@ def index():
 @app.route('/create', methods=['GET', 'POST'])
 def create_post():
     if request.method == 'POST':
-        title = (request.form['title'])
-        content = (request.form['content'])  
+        title = clean_output(request.form['title'])
+        content = clean_output(request.form['content'])  
 
         new_post = Post(title=title, content=content)
         db.session.add(new_post)
@@ -74,12 +74,8 @@ def edit_post(post_id):
     post = Post.query.get_or_404(post_id)
 
     if request.method == 'POST':
-        content = request.form['content']
-
-        if detect_xss(content):
-            return render_template('edit_post.html', post=post, error="XSS Attack detected. The changes were not saved.")
-
-        post.title = request.form['title']
+        content = cleanInput(request.form['content'])
+        post.title = cleanInput(request.form['title'])
         post.content = content
         db.session.commit()
         return redirect(url_for('post', post_id=post.id))
