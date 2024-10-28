@@ -1,12 +1,17 @@
-from flask import Flask, render_template, request, redirect, url_for, request, redirect, session
+from flask import Flask, render_template, request, redirect, url_for, request, redirect, session, flash
 from models import db, Post, User
 import bleach
 import os
 from functools import wraps
+from flask_limiter import Limiter
+from datetime import datetime, timedelta
+from flask_limiter.util import get_remote_address
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 
+ # adding the rate limiter to prevent Brute Force Attacks
+limiter = Limiter(get_remote_address, app=app, storage_uri="memory://")
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -16,10 +21,9 @@ with app.app_context():
     db.create_all()
 
 #added for assignment 2
-
 @app.before_request
 def loginCheck():
-    open_routes = ['login', 'register', 'static'] #this is the only open routes, meaning a user only have acsess to the login page and the register page
+    open_routes = ['login', 'register', 'static'] #this is the only open routes, meaning a user that is not logged in only have acsess to the login page and the register page
     if 'user_id' not in session and request.endpoint not in open_routes:
         return redirect(url_for('login'))
 
@@ -122,18 +126,22 @@ def register():
     
     return render_template('register.html')
 
+
 @app.route('/login', methods=['GET', 'POST'])
+@limiter.limit("3 per minute") # adding rate limiter as a Protection Against Brute Force Attacks. 
 def login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-
         user = User.query.filter_by(username=username).first()
+        
         if user and user.verify_password(password):
             session['user_id'] = user.id  
             return redirect(url_for('index'))
-        
-        return redirect(url_for('login'))
+    
+        session['attempts'] = session.get('attempts', 0) +1
+        if session['attempts'] > 3:
+            session['mandatory-time-out'] = datetime.now() + timedelta(3)    
     
     return render_template('login.html')
 
