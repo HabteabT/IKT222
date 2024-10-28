@@ -1,14 +1,27 @@
-from flask import Flask, render_template, request, redirect, url_for
-from models import db, Post
+from flask import Flask, render_template, request, redirect, url_for, request, redirect, session
+from models import db, Post, User
 import bleach
+import os
+from functools import wraps
 
 app = Flask(__name__)
+app.secret_key = os.urandom(24)
+
+
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
 with app.app_context():
     db.create_all()
+
+#added for assignment 2
+
+@app.before_request
+def loginCheck():
+    open_routes = ['login', 'register', 'static'] #this is the only open routes, meaning a user only have acsess to the login page and the register page
+    if 'user_id' not in session and request.endpoint not in open_routes:
+        return redirect(url_for('login'))
 
 @app.after_request
 def add_security_headers(response):
@@ -88,6 +101,41 @@ def delete_post(post_id):
     db.session.delete(post)
     db.session.commit()
     return redirect(url_for('index'))
+
+
+# Assignment 2:
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+
+        if User.query.filter_by(username=username).first():
+            return redirect(url_for('register'))
+        
+        newUser = User.createUser(username, password)
+        db.session.add(newUser)
+        db.session.commit()
+
+        return redirect(url_for('login'))
+    
+    return render_template('register.html')
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+
+        user = User.query.filter_by(username=username).first()
+        if user and user.verify_password(password):
+            session['user_id'] = user.id  
+            return redirect(url_for('index'))
+        
+        return redirect(url_for('login'))
+    
+    return render_template('login.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
