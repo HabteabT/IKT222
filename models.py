@@ -26,5 +26,3 @@ class User(db.Model):
 
     def verify_password(self, password):
         return bcrypt.checkpw(password.encode('utf-8'), self.hashedPassword)
-    
-    
