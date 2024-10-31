@@ -13,6 +13,7 @@ app.secret_key = os.urandom(24)
  # adding the rate limiter to prevent Brute Force Attacks
 limiter = Limiter(get_remote_address, app=app, storage_uri="memory://")
 
+
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -23,9 +24,10 @@ with app.app_context():
 #added for assignment 2
 @app.before_request
 def loginCheck():
-    open_routes = ['login', 'register', 'static'] #this is the only open routes, meaning a user that is not logged in only have acsess to the login page and the register page
+    open_routes = ['login_get', 'login', 'register', 'static']
     if 'user_id' not in session and request.endpoint not in open_routes:
-        return redirect(url_for('login'))
+        return redirect(url_for('login_get'))
+
 
 @app.after_request
 def add_security_headers(response):
@@ -127,23 +129,36 @@ def register():
     return render_template('register.html')
 
 
-@app.route('/login', methods=['GET', 'POST'])
-@limiter.limit("3 per minute") # adding rate limiter as a Protection Against Brute Force Attacks. 
-def login():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        user = User.query.filter_by(username=username).first()
-        
-        if user and user.verify_password(password):
-            session['user_id'] = user.id  
-            return redirect(url_for('index'))
-    
-        session['attempts'] = session.get('attempts', 0) +1
-        if session['attempts'] > 3:
-            session['mandatory-time-out'] = datetime.now() + timedelta(3)    
-    
+@app.route('/login', methods=['GET'])
+def login_get():
+    if 'mandatory-time-out' in session and datetime.now() < session['mandatory-time-out']:
+        return redirect(url_for('login_get'))
     return render_template('login.html')
+
+@app.route('/login', methods=['POST'])
+@limiter.limit("3 per minute", methods=["POST"])
+def login():
+    if 'mandatory-time-out' in session and datetime.now() < session['mandatory-time-out']:
+        return redirect(url_for('login_get'))
+
+    username = request.form['username']
+    password = request.form['password']
+    user = User.query.filter_by(username=username).first()
+
+    if user and user.verify_password(password):
+        session.pop('attempts', None) 
+        session.pop('mandatory-time-out', None) 
+        session['user_id'] = user.id
+        return redirect(url_for('index'))
+
+    session['attempts'] = session.get('attempts', 0) + 1
+    if session['attempts'] > 3:
+        session['mandatory-time-out'] = datetime.now() + timedelta(minutes=3)
+    else:
+        flash("Incorrect credentials.")
+
+    return redirect(url_for('login_get'))
+
 
 if __name__ == '__main__':
     app.run(debug=True)
