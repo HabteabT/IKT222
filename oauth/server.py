@@ -29,8 +29,8 @@ with app.app_context():
 # of the oauth for the application. But this was much simpler to do for this task
 
 # Mock constants for client ID and secret.
-CLIENT_ID = "YOUR_CLIENT_ID"
-CLIENT_SECRET = "YOUR_CLIENT_SECRET"
+CLIENT_ID = "1234567890abcdef"
+CLIENT_SECRET = "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6"
 REDIRECT_URI = "http://localhost:5000/callback"
 
 AUTH_CODES = {}  # Temporary storage for auth codes. Use a proper database in a real-world scenario.

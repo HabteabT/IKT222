@@ -3,64 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Application Consent</title>
+    <title>3rd Party Login</title>
     <style>
-        /* Reset margin and padding */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
-        /* Full-screen layout with a smooth gradient background */
         body, html {
+            height: 100%;
+            font-family: Arial, sans-serif;
             display: flex;
             align-items: center;
             justify-content: center;
-            height: 100%;
-            font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #0f0f0f, #1a1a1a); /* Smooth gradient background */
+            background: linear-gradient(to bottom, #121212, #1f1f1f); 
+            color: #333;
         }
 
-        /* Consent container styling */
-        .consent-container {
-            width: 400px;
-            padding: 20px;
-            background-color: #1e1e1e; /* Solid background for better contrast */
+        .login-container {
+            width: 360px;
+            padding: 40px;
+            background-color: rgba(255, 255, 255, 0.1); 
+            backdrop-filter: blur(10px); 
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);
             border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); /* Slightly softer shadow */
             text-align: center;
+            color: #e0e0e0;
         }
 
-        .consent-container h2 {
-            color: #ffffff;
-            margin-bottom: 15px;
-        }
-
-        .consent-container p {
-            color: #cccccc;
-            font-size: 14px;
+        .login-container img {
+            width: 80px;
             margin-bottom: 20px;
         }
 
-        .consent-container button {
-            padding: 10px 20px;
-            font-size: 16px;
+        .login-container h2 {
+            font-size: 1.5rem;
+            font-weight: 500;
+            color: #e0e0e0;
+            margin-bottom: 20px;
+        }
+
+        .login-container input[type="text"],
+        .login-container input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #dadce0;
+            border-radius: 4px;
+            font-size: 14px;
+            background-color: rgba(255, 255, 255, 0.15);
+            color: #e0e0e0;
+        }
+
+        .login-container button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 20px;
+            background-color: #4285f4;
             color: white;
-            background-color: #4CAF50;
             border: none;
             border-radius: 4px;
             cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            text-transform: uppercase;
         }
 
-        .consent-container button:hover {
-            background-color: #45a049;
+        .login-container button:hover {
+            background-color: #357ae8;
+        }
+
+        .login-container .footer-text {
+            margin-top: 30px;
+            font-size: 12px;
+            color: #b0b0b0;
+        }
+
+        .login-container .footer-text a {
+            color: #8ab4f8;
+            text-decoration: none;
+        }
+
+        .login-container .footer-text a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
-    <div class="consent-container">
+    <div class="login-container">
         <h2>Permission Request</h2>
+        
         <p>The application wants to access your username to personalize your experience.</p>
         <form method="POST" action="{{ url_for('consent') }}">
             <button type="submit">Confirm</button>
