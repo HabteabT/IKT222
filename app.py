@@ -19,8 +19,8 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 
-CLIENT_SECRET = "YOUR_CLIENT_SECRET"
-CLIENT_ID = "YOUR_CLIENT_ID"
+CLIENT_ID = "1234567890abcdef"
+CLIENT_SECRET = "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6"
 REDIRECT_URL = "http://localhost:5000/callback"
 STATE = "test3"
 OAUTH_SERVER_URL = "http://localhost:5001"
@@ -227,6 +227,13 @@ def callback():
         session["user_id"] = new_user.id
 
     return redirect("/")
+
+
+@app.route('/logout', methods=['GET'])
+def logout():
+    session.pop("user_id", None)
+    return redirect(url_for('login'))
+
 
 if __name__ == '__main__':
     app.run(debug=True)
