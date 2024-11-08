@@ -3,6 +3,7 @@ from models import db, Post, User
 import bleach
 import requests
 import os
+import secrets
 from functools import wraps
 from flask_limiter import Limiter
 from datetime import datetime, timedelta
@@ -22,7 +23,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 CLIENT_ID = "1234567890abcdef"
 CLIENT_SECRET = "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6"
 REDIRECT_URL = "http://localhost:5000/callback"
-STATE = "test3"
+STATE = secrets.token_urlsafe(16)
 OAUTH_SERVER_URL = "http://localhost:5001"
 
 OAUTH_DATA = {
@@ -182,6 +183,10 @@ def callback():
     state = request.args.get("state")
     if not auth_code:
         return "Authorization failed: no code returned", 400
+
+    # Possible CSRF attack
+    if state != STATE:
+        return "State missmatch!", 403
 
     # exchange authorization code for access token
     token_response = requests.post(
