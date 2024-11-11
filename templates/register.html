@@ -19,5 +19,13 @@
     </a>
 </form>
 
-<a href="{{ url_for('login') }}">Log inn here</a>
+<a href="{{ url_for('cleanupQrCode') }}">Log in here</a>
+
+{% if qr_code_url %}
+    <hr>
+    <h3>Two-Factor Authentication</h3>
+    <p>Scan the QR code with a authenticator app</p>
+    <img src="{{ qr_code_url }}" alt="QR Code for 2FA">
+{% endif %}
+
 {% endblock %}

@@ -1,6 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 import bcrypt
-
+import pyotp
 
 db = SQLAlchemy()
 
@@ -19,6 +19,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     hashedPassword = db.Column(db.LargeBinary, nullable=True)
     oauth_provider = db.Column(db.String(100), nullable=True)
+    twofactor = db.Column(db.String(32), nullable=True)
 
     def __repr__(self):
         return f'<User {self.username}>'
@@ -26,7 +27,8 @@ class User(db.Model):
     @classmethod
     def createUser(cls, username, password):
         hashedPassword = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
-        return cls(username=username, hashedPassword=hashedPassword)
+        twofactor = pyotp.random_base32()
+        return cls(username=username, hashedPassword=hashedPassword, twofactor = twofactor)
 
     def verify_password(self, password):
         return bcrypt.checkpw(password.encode('utf-8'), self.hashedPassword)

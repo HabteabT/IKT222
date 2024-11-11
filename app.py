@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, request, redirect, session, flash
+from flask import Flask, render_template, request, redirect, url_for, request, redirect, session, flash, send_file
 from models import db, Post, User
 import bleach
 import requests
@@ -8,6 +8,10 @@ from functools import wraps
 from flask_limiter import Limiter
 from datetime import datetime, timedelta
 from flask_limiter.util import get_remote_address
+from io import BytesIO
+import qrcode
+import pyotp
+import tempfile
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
@@ -126,6 +130,15 @@ def delete_post(post_id):
 
 # Assignment 2:
 
+@app.route('/cleanup_qr')
+def cleanupQrCode():
+    username = session.pop('Username', None)
+    path = f'static/{username}_qrcode.png'
+    if os.path.exists(path):
+        os.remove(path)
+    return redirect(url_for('login_get'))    
+
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
@@ -139,7 +152,14 @@ def register():
         db.session.add(newUser)
         db.session.commit()
 
-        return redirect(url_for('login'))
+        totp = pyotp.TOTP(newUser.twofactor)
+        uri = totp.provisioning_uri(name=username, issuer_name = "IKT222")
+        qr_code_path = f'static/{username}_qrcode.png'
+        qrcode.make(uri).save(qr_code_path)
+
+        session['Username'] = username
+
+        return render_template('register.html', oauth_data=OAUTH_DATA, qr_code_url=qr_code_path)
     
     return render_template('register.html', oauth_data=OAUTH_DATA)
 
@@ -158,14 +178,21 @@ def login():
 
     username = request.form['username']
     password = request.form['password']
+
+    totp_code = request.form.get('totp_code')
+
     # oauth is not signed in here
     user = User.query.filter_by(username=username, oauth_provider=None).first()
 
     if user and user.verify_password(password):
-        session.pop('attempts', None) 
-        session.pop('mandatory-time-out', None) 
-        session['user_id'] = user.id
-        return redirect(url_for('index'))
+        totp = pyotp.TOTP(user.twofactor)
+        if totp.verify(totp_code):
+            session.pop('attempts', None) 
+            session.pop('mandatory-time-out', None) 
+            session['user_id'] = user.id
+            return redirect(url_for('index'))
+        else:
+            return redirect(url_for('login_get'))
 
     session['attempts'] = session.get('attempts', 0) + 1
     if session['attempts'] > 3:
