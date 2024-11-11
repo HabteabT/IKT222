@@ -19,14 +19,13 @@
     </a>
 </form>
 
-<a href="{{ url_for('login') }}">Log inn here</a>
+<a href="{{ url_for('cleanupQrCode') }}">Log in here</a>
 
 {% if qr_code_url %}
     <hr>
-    <h3>Two-Factor Authentication (2FA)</h3>
-    <p>Scan the QR code below with your authenticator app (e.g., Google Authenticator) to enable 2FA:</p>
+    <h3>Two-Factor Authentication</h3>
+    <p>Scan the QR code with a authenticator app</p>
     <img src="{{ qr_code_url }}" alt="QR Code for 2FA">
-    <p><strong>Note:</strong> Make sure to save this 2FA setup as it will be required during login.</p>
 {% endif %}
 
 {% endblock %}

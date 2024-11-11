@@ -11,6 +11,7 @@ from flask_limiter.util import get_remote_address
 from io import BytesIO
 import qrcode
 import pyotp
+import tempfile
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
@@ -129,12 +130,14 @@ def delete_post(post_id):
 
 # Assignment 2:
 
-@app.route('/display_qr_code')
-def display_qr_code():
-    buffer = BytesIO()
-    qrcode.save(buffer)
-    buffer.seek(0)
-    return send_file(buffer, mimetype='image/png')
+@app.route('/cleanup_qr')
+def cleanupQrCode():
+    username = session.pop('Username', None)
+    path = f'static/{username}_qrcode.png'
+    if os.path.exists(path):
+        os.remove(path)
+    return redirect(url_for('login_get'))    
+
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -151,12 +154,12 @@ def register():
 
         totp = pyotp.TOTP(newUser.twofactor)
         uri = totp.provisioning_uri(name=username, issuer_name = "IKT222")
-        qrcodeImage = qrcode.make(uri)
-        buffer = BytesIO()
-        qrcodeImage.save(buffer)
-        buffer.seek(0)
+        qr_code_path = f'static/{username}_qrcode.png'
+        qrcode.make(uri).save(qr_code_path)
 
-        return send_file(buffer, mimetype='image/png')
+        session['Username'] = username
+
+        return render_template('register.html', oauth_data=OAUTH_DATA, qr_code_url=qr_code_path)
     
     return render_template('register.html', oauth_data=OAUTH_DATA)
 
